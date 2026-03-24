@@ -1,0 +1,37 @@
+<!-- REIA Tracking Pixel - paste this in the HEAD section of your landing page -->
+<script>
+(function() {
+  var EDUCATOR_ID = 'REPLACE_WITH_EDUCATOR_ID';
+  var PIXEL_URL = 'https://utm-tracking-three.vercel.app/api/pixel';
+
+  var params = new URLSearchParams(window.location.search);
+  var utmSource = params.get('utm_source');
+
+  if (utmSource === 'utahreia') {
+    sessionStorage.setItem('reia_utm_source',   utmSource);
+    sessionStorage.setItem('reia_utm_medium',   params.get('utm_medium')   || '');
+    sessionStorage.setItem('reia_utm_campaign', params.get('utm_campaign') || '');
+    sessionStorage.setItem('reia_utm_content',  params.get('utm_content')  || '');
+    sessionStorage.setItem('reia_gclid',        params.get('gclid')        || '');
+    sessionStorage.setItem('reia_fbclid',       params.get('fbclid')       || '');
+  }
+
+  var storedSource = sessionStorage.getItem('reia_utm_source');
+  if (storedSource === 'utahreia') {
+    fetch(PIXEL_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event:        'page_view',
+        educator_id:  EDUCATOR_ID,
+        utm_source:   storedSource,
+        utm_medium:   sessionStorage.getItem('reia_utm_medium'),
+        utm_campaign: sessionStorage.getItem('reia_utm_campaign'),
+        utm_content:  sessionStorage.getItem('reia_utm_content'),
+        page_url:     window.location.href,
+        referrer:     document.referrer
+      })
+    }).catch(function() {});
+  }
+})();
+</script>

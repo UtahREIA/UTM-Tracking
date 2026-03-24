@@ -1,0 +1,29 @@
+<!-- REIA Purchase Pixel - paste this on your checkout SUCCESS page only -->
+<script>
+(function() {
+  var EDUCATOR_ID = 'REPLACE_WITH_EDUCATOR_ID';
+  var PIXEL_URL = 'https://utm-tracking-three.vercel.app/api/pixel';
+
+  var storedSource = sessionStorage.getItem('reia_utm_source');
+
+  if (storedSource === 'utahreia') {
+    fetch(PIXEL_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event:        'purchase',
+        educator_id:  EDUCATOR_ID,
+        utm_source:   storedSource,
+        utm_medium:   sessionStorage.getItem('reia_utm_medium'),
+        utm_campaign: sessionStorage.getItem('reia_utm_campaign'),
+        utm_content:  sessionStorage.getItem('reia_utm_content'),
+        order_value:  window.REIA_ORDER_VALUE  || null,
+        order_id:     window.REIA_ORDER_ID     || null,
+        product_id:   window.REIA_PRODUCT_ID   || null,
+        coupon_code:  window.REIA_COUPON_CODE  || null,
+        page_url:     window.location.href
+      })
+    }).catch(function() {});
+  }
+})();
+</script>

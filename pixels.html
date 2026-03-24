@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>REIA Tracking Pixel - Educator Installation Guide</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; color: #1f2937; }
+    h1 { color: #0f1f3d; }
+    h2 { color: #1d4ed8; margin-top: 40px; }
+    pre { background: #f3f4f6; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; border-left: 4px solid #1d4ed8; }
+    .note { background: #fef3c7; padding: 12px 16px; border-radius: 8px; border-left: 4px solid #d97706; margin: 16px 0; }
+    .important { background: #fee2e2; padding: 12px 16px; border-radius: 8px; border-left: 4px solid #dc2626; margin: 16px 0; }
+    .step { background: #dbeafe; padding: 12px 16px; border-radius: 8px; margin: 10px 0; }
+  </style>
+</head>
+<body>
+
+  <h1>REIA Tracking Pixel - Installation Guide</h1>
+  <p>This guide contains two pixel snippets to install on your website. Follow the steps below carefully.</p>
+
+  <div class="important">
+    <strong>Before you start:</strong> Replace <code>REPLACE_WITH_EDUCATOR_ID</code> in both snippets below with your unique educator ID provided by Utah REIA.
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>Snippet 1 - Landing Page Pixel</h2>
+  <p>Paste this code into the <strong>HEAD section</strong> of your landing page. This is the page visitors land on when they click from the Utah REIA website.</p>
+
+  <div class="note">
+    This snippet captures UTM values when a REIA visitor arrives and stores them so they survive through your entire checkout flow.
+  </div>
+
+  <div class="step"><strong>Where to paste:</strong> Your landing page head section — in Kajabi, Teachable, or your CMS go to Page Settings → Tracking Codes → Head and paste it there.</div>
+
+  <pre>
+&lt;!-- REIA Landing Page Pixel --&gt;
+&lt;script&gt;
+(function() {
+  var EDUCATOR_ID = 'REPLACE_WITH_EDUCATOR_ID';
+  var PIXEL_URL = 'https://utm-tracking-three.vercel.app/api/pixel';
+
+  // Capture UTM values when visitor arrives from REIA
+  var params = new URLSearchParams(window.location.search);
+  var utmSource = params.get('utm_source');
+
+  if (utmSource === 'utahreia') {
+    sessionStorage.setItem('reia_utm_source',   utmSource);
+    sessionStorage.setItem('reia_utm_medium',   params.get('utm_medium')   || '');
+    sessionStorage.setItem('reia_utm_campaign', params.get('utm_campaign') || '');
+    sessionStorage.setItem('reia_utm_content',  params.get('utm_content')  || '');
+    sessionStorage.setItem('reia_gclid',        params.get('gclid')        || '');
+    sessionStorage.setItem('reia_fbclid',       params.get('fbclid')       || '');
+  }
+
+  // Fire page_view event if visitor came from REIA
+  var storedSource = sessionStorage.getItem('reia_utm_source');
+  if (storedSource === 'utahreia') {
+    fetch(PIXEL_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event:        'page_view',
+        educator_id:  EDUCATOR_ID,
+        utm_source:   storedSource,
+        utm_medium:   sessionStorage.getItem('reia_utm_medium'),
+        utm_campaign: sessionStorage.getItem('reia_utm_campaign'),
+        utm_content:  sessionStorage.getItem('reia_utm_content'),
+        page_url:     window.location.href,
+        referrer:     document.referrer
+      })
+    }).catch(function() {});
+  }
+})();
+&lt;/script&gt;
+  </pre>
+
+  <!-- ============================================================ -->
+  <h2>Snippet 2 - Checkout Success Page Pixel</h2>
+  <p>Paste this code into the <strong>HEAD section</strong> of your checkout success or thank you page. This is the page shown after a purchase is completed.</p>
+
+  <div class="note">
+    This snippet fires a purchase event back to REIA so they can confirm the conversion and attribute the sale correctly.
+  </div>
+
+  <div class="step"><strong>Where to paste:</strong> Your order confirmation or thank you page head section only. Do NOT paste this on the landing page.</div>
+
+  <div class="note">
+    <strong>Optional:</strong> If your platform makes order data available as JavaScript variables, set these values before the snippet runs so REIA receives the full order details:
+    <br><br>
+    <code>window.REIA_ORDER_VALUE = 497.00;</code><br>
+    <code>window.REIA_ORDER_ID = 'your_order_id';</code><br>
+    <code>window.REIA_PRODUCT_ID = 'your_product_id';</code><br>
+    <code>window.REIA_COUPON_CODE = 'coupon_used_or_empty';</code>
+  </div>
+
+  <pre>
+&lt;!-- REIA Purchase Pixel - SUCCESS PAGE ONLY --&gt;
+&lt;script&gt;
+(function() {
+  var EDUCATOR_ID = 'REPLACE_WITH_EDUCATOR_ID';
+  var PIXEL_URL = 'https://utm-tracking-three.vercel.app/api/pixel';
+
+  // Only fire if this visitor originally came from REIA
+  var storedSource = sessionStorage.getItem('reia_utm_source');
+
+  if (storedSource === 'utahreia') {
+    fetch(PIXEL_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event:        'purchase',
+        educator_id:  EDUCATOR_ID,
+        utm_source:   storedSource,
+        utm_medium:   sessionStorage.getItem('reia_utm_medium'),
+        utm_campaign: sessionStorage.getItem('reia_utm_campaign'),
+        utm_content:  sessionStorage.getItem('reia_utm_content'),
+        order_value:  window.REIA_ORDER_VALUE  || null,
+        order_id:     window.REIA_ORDER_ID     || null,
+        product_id:   window.REIA_PRODUCT_ID   || null,
+        coupon_code:  window.REIA_COUPON_CODE  || null,
+        page_url:     window.location.href
+      })
+    }).catch(function() {});
+  }
+})();
+&lt;/script&gt;
+  </pre>
+
+  <!-- ============================================================ -->
+  <h2>Summary</h2>
+  <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse; width:100%; font-size:14px;">
+    <thead style="background:#0f1f3d; color:white;">
+      <tr>
+        <th>Snippet</th>
+        <th>Where to install</th>
+        <th>What it does</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Snippet 1 - Landing page</td>
+        <td>Head section of your landing page</td>
+        <td>Captures UTM values and fires page_view event</td>
+      </tr>
+      <tr style="background:#f3f4f6;">
+        <td>Snippet 2 - Success page</td>
+        <td>Head section of your checkout success page</td>
+        <td>Fires purchase event with order details</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note" style="margin-top:30px;">
+    <strong>Need help?</strong> Contact Utah REIA and we will walk you through the installation for your specific platform.
+  </div>
+
+</body>
+</html>
