@@ -45,7 +45,7 @@ module.exports = async (req, res) => {
   const timestamp = req.headers['x-reia-timestamp']
 
   const now = Math.floor(Date.now() / 1000)
-  if (!timestamp || Math.abs(now - parseInt(timestamp)) > 86400) {
+  if (!timestamp || Math.abs(now - parseInt(timestamp)) > 300) {
     return res.status(400).json({ error: 'Request expired' })
   }
 
