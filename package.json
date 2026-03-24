@@ -1,0 +1,26 @@
+{
+  "name": "utm-tracking",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/UtahREIA/UTM-Tracking.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/UtahREIA/UTM-Tracking/issues"
+  },
+  "homepage": "https://github.com/UtahREIA/UTM-Tracking#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.100.0"
+  }
+}
